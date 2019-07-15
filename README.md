@@ -1,3 +1,5 @@
 # how to set up
-`ln -s ~/dotfiles/.vimrc ~/.vimrc`
+`cd ~`  
+`git clone https://github.com/nishio-kun/dotfiles.git`  
+`ln -s ~/dotfiles/.vimrc ~/.vimrc`  
 `ln -s ~/dotfiles/.vim ~/.vim`

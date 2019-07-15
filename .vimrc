@@ -61,7 +61,7 @@ syntax on  " syntax highlight
 let g:sonictemplate_vim_template_dir = [
       \ '~/.vim/template'
       \]
-autocmd BufNewFile *.py 0r $HOME/.vim/template/python.txt  " template for python
+autocmd BufNewFile *.py 0r $HOME/.vim/template/python.txt  " template for Python
 
 " auto reload .vimrc
 augroup source-vimrc
