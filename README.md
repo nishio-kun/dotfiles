@@ -1,2 +1,3 @@
 # how to set up
-`sh setup.sh`  
+`cd ~`
+`sh ./dotfiles/setup.sh`
