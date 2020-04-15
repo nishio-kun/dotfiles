@@ -85,7 +85,7 @@ noremap <Space>h ^
 noremap <Space>l $
 nnoremap <Space>/ *
 
-inoremap { {}<LEFT
-inoremap ( ()<LEFT
+inoremap { {}<LEFT>
+inoremap ( ()<LEFT>
 
 abbrev sbp3 #!/usr/bin/env python3
