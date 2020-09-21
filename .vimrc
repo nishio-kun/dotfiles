@@ -86,6 +86,10 @@ noremap <Space>h ^
 noremap <Space>l $
 nnoremap <Space>/ *
 
+" x, s で削除した文字をヤンクしない
+nnoremap x "_x
+nnoremap s "_s
+
 inoremap { {}<LEFT>
 inoremap ( ()<LEFT>
 inoremap [ []<LEFT>
