@@ -1,3 +1,3 @@
-ln -is .vimrc ~/.vimrc
-ln -ins .vim ~/.vim
-ln -is .tmux.conf ~/.tmux.conf
+ln -is `pwd`/.vimrc ~/.vimrc
+ln -ins `pwd`/.vim ~/.vim
+ln -is `pwd`/.tmux.conf ~/.tmux.conf
