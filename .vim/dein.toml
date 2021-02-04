@@ -1,0 +1,9 @@
+[[plugins]]
+repo = 'junegunn/fzf'
+build_on = '''
+./install -all
+'''
+
+repo = 'junegunn/fzf.vim'
+repo = 'markonm/traces.vim'
+repo = 'kovisoft/slimv'
