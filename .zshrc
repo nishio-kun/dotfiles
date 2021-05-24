@@ -5,7 +5,8 @@ export PATH=$PATH:$HOME/tools
 export PATH=$PATH:/usr/local/Cellar/vim/8.1.2200/bin/vim
 # export PATH="/Users/nishio-kun/anaconda3/bin:$PATH"  # commented out by conda initialize
 export PATH="/usr/local/opt/binutils/bin:$PATH"
-
+export PATH=$PATH:~/.roswell/bin
+export PATH=$PATH:~/flutter/bin
 
 # 色を使用出来るようにする
 autoload -Uz colors
@@ -172,3 +173,6 @@ function ghq-fzf() {
 }
 zle -N ghq-fzf
 bindkey '^]' ghq-fzf
+
+# GitHub CLI の補完
+eval "$(gh completion -s zsh)"
