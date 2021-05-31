@@ -1,7 +1,6 @@
 ########################################
 # 環境変数
 export LANG=ja_JP.UTF-8
-export PATH=$PATH:$HOME/tools
 export PATH=$PATH:/usr/local/Cellar/vim/8.1.2200/bin/vim
 # export PATH="/Users/nishio-kun/anaconda3/bin:$PATH"  # commented out by conda initialize
 export PATH="/usr/local/opt/binutils/bin:$PATH"
