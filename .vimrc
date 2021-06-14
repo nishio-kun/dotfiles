@@ -86,6 +86,8 @@ noremap <Space>h ^
 noremap <Space>l $
 nnoremap <Space>/ *
 
+noremap K A  # XXX<Esc>
+
 " s で削除した文字をヤンクしない
 nnoremap s "_s
 
