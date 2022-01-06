@@ -175,3 +175,6 @@ bindkey '^]' ghq-fzf
 
 # GitHub CLI の補完
 eval "$(gh completion -s zsh)"
+
+# Created by `pipx` on 2021-09-20 01:49:31
+export PATH="$PATH:/Users/nishio-kun/.local/bin"
