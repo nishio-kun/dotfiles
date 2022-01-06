@@ -178,3 +178,5 @@ eval "$(gh completion -s zsh)"
 
 # Created by `pipx` on 2021-09-20 01:49:31
 export PATH="$PATH:/Users/nishio-kun/.local/bin"
+
+. /usr/local/opt/asdf/asdf.sh
