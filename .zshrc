@@ -180,3 +180,5 @@ eval "$(gh completion -s zsh)"
 export PATH="$PATH:/Users/nishio-kun/.local/bin"
 
 . /usr/local/opt/asdf/asdf.sh
+
+export PATH="$HOME/.poetry/bin:$PATH"
