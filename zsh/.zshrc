@@ -118,7 +118,7 @@ function git_branch_name() {
   local branch
   if branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); then
     if [[ -n $(git status --porcelain 2>/dev/null) ]]; then
-      echo "%F{red}⚡ $branch%f"
+      echo "%F{red} $branch%f"
     else
       echo "%F{green}✓ $branch%f"
     fi
