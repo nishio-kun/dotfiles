@@ -17,13 +17,17 @@ fi
 export PATH="$HOME/.poetry/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
-# Tesseract OCR
-export TESSDATA_PREFIX=/opt/homebrew/share/
+# Tool-specific environment variables (conditionally loaded)
+if command -v tesseract >/dev/null 2>&1; then
+  export TESSDATA_PREFIX=/opt/homebrew/share/
+fi
 
-# コンパイル環境（asdf pythonビルド用）
-export LDFLAGS="-L/opt/homebrew/opt/zlib/lib -L/opt/homebrew/opt/sqlite/lib -L/opt/homebrew/opt/openssl/lib -L/opt/homebrew/opt/readline/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/zlib/include -I/opt/homebrew/opt/sqlite/include -I/opt/homebrew/opt/openssl/include -I/opt/homebrew/opt/readline/include"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/zlib/lib/pkgconfig:/opt/homebrew/opt/sqlite/lib/pkgconfig:/opt/homebrew/opt/openssl/lib/pkgconfig:/opt/homebrew/opt/readline/lib"
+# Build environment for Python compilation (asdf python builds)
+if [[ $(uname -m) == "arm64" ]]; then
+  export LDFLAGS="-L/opt/homebrew/opt/zlib/lib -L/opt/homebrew/opt/sqlite/lib -L/opt/homebrew/opt/openssl/lib -L/opt/homebrew/opt/readline/lib"
+  export CPPFLAGS="-I/opt/homebrew/opt/zlib/include -I/opt/homebrew/opt/sqlite/include -I/opt/homebrew/opt/openssl/include -I/opt/homebrew/opt/readline/include"
+  export PKG_CONFIG_PATH="/opt/homebrew/opt/zlib/lib/pkgconfig:/opt/homebrew/opt/sqlite/lib/pkgconfig:/opt/homebrew/opt/openssl/lib/pkgconfig:/opt/homebrew/opt/readline/lib"
+fi
 export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
 
 ########################################
@@ -50,12 +54,25 @@ if [ -f '$HOME/google-cloud-sdk/path.zsh.inc' ]; then . '$HOME/google-cloud-sdk/
 if [ -f '$HOME/google-cloud-sdk/completion.zsh.inc' ]; then . '$HOME/google-cloud-sdk/completion.zsh.inc'; fi
 
 ########################################
-# 補完
+# 補完設定
 autoload -Uz compinit
-fpath+=~/.zfunc
-fpath+=("/opt/homebrew/share/zsh/site-functions")
-compinit
 
+# Completion cache optimization
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
+
+# Completion paths
+fpath=(~/.zfunc $fpath)
+if [[ $(uname -m) == "arm64" ]]; then
+  fpath+=("/opt/homebrew/share/zsh/site-functions")
+else
+  fpath+=("/usr/local/share/zsh/site-functions")
+fi
+
+# Completion styles
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 zstyle ':completion:*' ignore-parents parent pwd ..
 zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin /usr/X11R6/bin
@@ -91,87 +108,59 @@ bindkey '^R' history-incremental-pattern-search-backward
 ########################################
 # プロンプト設定
 setopt prompt_subst
-fpath=(~/.zsh/completion $fpath)
 
-function left-prompt {
-  name_t='179m%}'
-  name_b='000m%}'
-  path_t='255m%}'
-  path_b='031m%}'
-  arrow='087m%}'
-  text_color='%{\e[38;5;'
-  back_color='%{\e[30;48;5;'
-  reset='%{\e[0m%}'
-  sharp="\uE0B0"
+# Simple two-line prompt with git info
+PROMPT='%F{cyan}%n@%m%f %F{blue}%~%f
+%F{green}❯%f '
 
-  user="${back_color}${name_b}${text_color}${name_t}"
-  dir="${back_color}${path_b}${text_color}${path_t}"
-  echo "${user}%n%#@%m${back_color}${path_b}${text_color}${name_b}${sharp} ${dir}%~${reset}${text_color}${path_b}${sharp}${reset}\n${text_color}${arrow}> ${reset}"
-}
-
-PROMPT='`left-prompt`'
-
-function precmd() {
-  if [ -z "$NEW_LINE_BEFORE_PROMPT" ]; then
-      NEW_LINE_BEFORE_PROMPT=1
-  elif [ "$NEW_LINE_BEFORE_PROMPT" -eq 1 ]; then
-      echo ""
+# Git branch display on right side
+function git_branch_name() {
+  local branch
+  if branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); then
+    if [[ -n $(git status --porcelain 2>/dev/null) ]]; then
+      echo "%F{red}⚡ $branch%f"
+    else
+      echo "%F{green}✓ $branch%f"
+    fi
   fi
 }
 
-function rprompt-git-current-branch {
-  local branch_name st branch_status
-  branch='\ue0a0'
-  color='%{\e[38;5;'
-  green='114m%}'
-  red='001m%}'
-  yellow='227m%}'
-  blue='033m%}'
-  reset='%{\e[0m%}'
-
-  if [ ! -e  ".git" ]; then return; fi
-  branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-  st=$(git status 2>/dev/null)
-
-  if [[ -n $(echo "$st" | grep "^nothing to") ]]; then
-    branch_status="${color}${green}${branch}"
-  elif [[ -n $(echo "$st" | grep "^Untracked files") ]]; then
-    branch_status="${color}${red}${branch}?"
-  elif [[ -n $(echo "$st" | grep "^Changes not staged for commit") ]]; then
-    branch_status="${color}${red}${branch}+"
-  elif [[ -n $(echo "$st" | grep "^Changes to be committed") ]]; then
-    branch_status="${color}${yellow}${branch}!"
-  elif [[ -n $(echo "$st" | grep "^rebase in progress") ]]; then
-    echo "${color}${red}${branch}!(no branch)${reset}"
-    return
-  else
-    branch_status="${color}${blue}${branch}"
-  fi
-
-  echo "${branch_status}$branch_name${reset}"
-}
-
-RPROMPT='`rprompt-git-current-branch`'
+RPROMPT='$(git_branch_name)'
 
 ########################################
 # エイリアス
+# File operations
 alias ls='ls -G -F'
-alias la='ls -a'
+alias la='ls -la'
 alias ll='ls -l'
+alias l='ls -CF'
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 alias mkdir='mkdir -p'
 
+# Git shortcuts
+alias g='git'
 alias gs='git status'
-alias gpp='git pull --prune'
-alias glogr='git log --oneline --graph --remotes'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gpl='git pull --prune'
 alias glog='git log --oneline --graph'
+alias glogr='git log --oneline --graph --remotes'
+alias gd='git diff'
+alias gb='git branch'
 
+# Docker shortcuts
+alias d='docker'
+alias dc='docker-compose'
 alias dcb='docker-compose build'
 alias dcu='docker-compose up'
 alias dcd='docker-compose down'
 
+# Python/Conda shortcuts
+alias py='python3'
+alias pip='pip3'
 alias cab='conda activate base'
 
 ########################################
