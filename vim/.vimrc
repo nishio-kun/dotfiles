@@ -34,7 +34,8 @@ set ignorecase  " 検索するときに大文字小文字を区別しない
 set incsearch  " 検索がファイル末まで進んだら、ファイル先頭から再び検索
 set smartcase  " 小文字で検索すると大文字と小文字を無視して検索
 set wrapscan  " 検索時に最後まで行ったら最初に戻る
-set rtp+=/usr/local/opt/fzf  " vim 内で fzf を使う
+" set rtp+=/usr/local/opt/fzf  " vim 内で fzf を使う
+set rtp+=/opt/homebrew/opt/fzf  " vim 内で fzf を使う
 
 
 " TAB
