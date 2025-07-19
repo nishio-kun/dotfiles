@@ -3,11 +3,19 @@
 export LANG=ja_JP.UTF-8
 export CLICOLOR=1
 
-export PATH="/usr/local/opt/binutils/bin:$PATH"
-export PATH="/usr/local/Cellar/vim/8.1.2200/bin/vim:$PATH"
-export PATH="/opt/homebrew/opt/tcl-tk/bin:$PATH"
+# Architecture-specific PATH settings
+if [[ $(uname -m) == "arm64" ]]; then
+  # Apple Silicon
+  export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
+  export PATH="/opt/homebrew/opt/tcl-tk/bin:$PATH"
+else
+  # Intel Mac
+  export PATH="/usr/local/opt/binutils/bin:$PATH"
+fi
+
+# Tool-specific PATH settings
 export PATH="$HOME/.poetry/bin:$PATH"
-export PATH="$PATH:/Users/nishio-kun/.local/bin"
+export PATH="$HOME/.local/bin:$PATH"
 
 # Tesseract OCR
 export TESSDATA_PREFIX=/opt/homebrew/share/
@@ -24,22 +32,22 @@ export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
 
 ########################################
 # conda（Miniforge）
-__conda_setup="$('/Users/yukinishio/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$('$HOME/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/Users/yukinishio/miniforge3/etc/profile.d/conda.sh" ]; then
-        . "/Users/yukinishio/miniforge3/etc/profile.d/conda.sh"
+    if [ -f "$HOME/miniforge3/etc/profile.d/conda.sh" ]; then
+        . "$HOME/miniforge3/etc/profile.d/conda.sh"
     else
-        export PATH="/Users/yukinishio/miniforge3/bin:$PATH"
+        export PATH="$HOME/miniforge3/bin:$PATH"
     fi
 fi
 unset __conda_setup
 
 ########################################
 # Google Cloud SDK
-if [ -f '/Users/yukinishio/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/yukinishio/google-cloud-sdk/path.zsh.inc'; fi
-if [ -f '/Users/yukinishio/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/yukinishio/google-cloud-sdk/completion.zsh.inc'; fi
+if [ -f '$HOME/google-cloud-sdk/path.zsh.inc' ]; then . '$HOME/google-cloud-sdk/path.zsh.inc'; fi
+if [ -f '$HOME/google-cloud-sdk/completion.zsh.inc' ]; then . '$HOME/google-cloud-sdk/completion.zsh.inc'; fi
 
 ########################################
 # 補完
@@ -183,11 +191,11 @@ bindkey '^]' ghq-fzf
 
 # GitHub CLI 補完
 eval "$(gh completion -s zsh)"
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
 
+# Python version management - using asdf (pyenv settings removed for consistency)
+# Note: pyenv and asdf conflict, using asdf as primary tool
+
+# Node.js version management
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
