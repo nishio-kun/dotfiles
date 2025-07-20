@@ -16,3 +16,7 @@ chmod a+x ~/.zsh/completion/git-completion.zsh
 mv ~/.zsh/completion/git-completion.zsh ~/.zsh/completion/_git
 
 rm -f ~/.zcompdump
+
+# Download iTerm2 color schemes
+mkdir -p iterm2
+curl -o iterm2/GitHub-Dark.itermcolors "https://raw.githubusercontent.com/alDuncanson/Github-Dark/main/GitHub%20Dark.itermcolors"

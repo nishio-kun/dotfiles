@@ -14,8 +14,10 @@ git clone https://github.com/nishio-kun/dotfiles.git \
 
 ### iTerm2 Color Scheme
 
-Setup Solarized color scheme:
+The GitHub Dark color scheme is automatically downloaded by the setup script.
 
-1. Open iTerm2 → Preferences → Profiles → Colors
-2. Click "Color Presets" dropdown
-3. Select "Solarized Dark" or "Solarized Light" from the built-in presets
+Manual setup:
+1. Double-click `iterm2/GitHub-Dark.itermcolors` to import the color scheme
+2. Open iTerm2 → Preferences → Profiles → Colors
+3. Click "Color Presets" dropdown
+4. Select "GitHub Dark" from the presets
