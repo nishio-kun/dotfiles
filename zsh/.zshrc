@@ -110,17 +110,17 @@ bindkey '^R' history-incremental-pattern-search-backward
 setopt prompt_subst
 
 # Simple two-line prompt with git info
-PROMPT='%F{cyan}%n@%m%f %F{blue}%~%f
-%F{green}❯%f '
+PROMPT='%F{246}%n@%m%f %F{110}%~%f
+%F{gray}❯%f '
 
 # Git branch display on right side
 function git_branch_name() {
   local branch
   if branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); then
     if [[ -n $(git status --porcelain 2>/dev/null) ]]; then
-      echo "%F{red} $branch%f"
+      echo "%F{167} $branch%f"
     else
-      echo "%F{green}✓ $branch%f"
+      echo "%F{108}✓ $branch%f"
     fi
   fi
 }
