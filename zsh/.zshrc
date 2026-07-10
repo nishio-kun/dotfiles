@@ -37,22 +37,10 @@ export ASDF_DATA_DIR="${ASDF_DATA_DIR:-$HOME/.asdf}"
 export PATH="$ASDF_DATA_DIR/shims:$PATH"
 
 ########################################
-# Google Cloud SDK
-if [ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/google-cloud-sdk/path.zsh.inc"; fi
-if [ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/google-cloud-sdk/completion.zsh.inc"; fi
-
-########################################
 # 補完設定
-autoload -Uz compinit
-
-# Completion cache optimization
-if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
-  compinit
-else
-  compinit -C
-fi
 
 # Completion paths
+# compinit は実行時点の fpath だけを走査するため、必ず先に確定させる
 fpath=(~/.zfunc $fpath)
 if [[ $(uname -m) == "arm64" ]]; then
   fpath+=("/opt/homebrew/share/zsh/site-functions")
@@ -60,11 +48,33 @@ else
   fpath+=("/usr/local/share/zsh/site-functions")
 fi
 
+# 下の (#q...) を glob qualifier として解釈させるために必要
+setopt extended_glob
+
+autoload -Uz compinit
+
+# Completion cache optimization
+# glob qualifier は [[ ]] 内で展開されないので配列で受ける
+_zdump=(${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24))
+if (( $#_zdump )); then
+  compinit
+else
+  compinit -C
+fi
+unset _zdump
+
 # Completion styles
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 zstyle ':completion:*' ignore-parents parent pwd ..
 zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin /usr/X11R6/bin
 zstyle ':completion:*:processes' command 'ps x -o pid,s,args'
+
+########################################
+# Google Cloud SDK
+# completion.zsh.inc は compdef が未定義だと自前で compinit を走らせるため、
+# 必ず上の compinit より後に読み込む
+if [ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/google-cloud-sdk/path.zsh.inc"; fi
+if [ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/google-cloud-sdk/completion.zsh.inc"; fi
 
 ########################################
 # ヒストリ
@@ -86,7 +96,7 @@ setopt share_history
 setopt hist_ignore_all_dups
 setopt hist_ignore_space
 setopt hist_reduce_blanks
-setopt extended_glob
+# extended_glob は補完設定より前に有効化する必要があるため上部で setopt 済み
 
 ########################################
 # キーバインド
