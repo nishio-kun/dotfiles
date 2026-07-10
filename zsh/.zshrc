@@ -70,11 +70,21 @@ zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin /usr/s
 zstyle ':completion:*:processes' command 'ps x -o pid,s,args'
 
 ########################################
-# Google Cloud SDK
-# completion.zsh.inc は compdef が未定義だと自前で compinit を走らせるため、
-# 必ず上の compinit より後に読み込む
-if [ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/google-cloud-sdk/path.zsh.inc"; fi
-if [ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/google-cloud-sdk/completion.zsh.inc"; fi
+# Google Cloud SDK（補完を遅延ロード）
+# path.zsh.inc は PATH 追加だけ（`export PATH=.../bin:$PATH`）なのでインライン化。
+# 重い completion.zsh.inc（約0.24秒）は初回に gcloud/gsutil/bq を実行した時のみ読む。
+# バイナリ自体は起動直後から使えるので、遅延するのは Tab 補完だけ。
+if [ -d "$HOME/google-cloud-sdk/bin" ]; then
+  export PATH="$HOME/google-cloud-sdk/bin:$PATH"
+  _lazy_gcloud_init() {
+    unfunction gcloud gsutil bq 2>/dev/null
+    # completion.zsh.inc は compdef 前提。compinit は上で実行済みなので安全。
+    [ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ] && . "$HOME/google-cloud-sdk/completion.zsh.inc"
+  }
+  gcloud() { _lazy_gcloud_init; command gcloud "$@"; }
+  gsutil() { _lazy_gcloud_init; command gsutil "$@"; }
+  bq()     { _lazy_gcloud_init; command bq "$@"; }
+fi
 
 ########################################
 # ヒストリ
@@ -188,6 +198,15 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
+########################################
+# conda / mamba（遅延ロード）
+# base の自動有効化は無効（~/.condarc: auto_activate_base=false）なので、起動時に
+# hook を eval しても conda 関数を定義するだけ。初回に conda/mamba を呼んだ時のみ
+# 初期化し、プロンプト表示を約0.25秒短縮する。挙動は eager 版と変わらない。
+# 内側の >>> ... <<< ブロックは `conda init` / `mamba shell init` が管理する。
+_lazy_conda_init() {
+  unfunction conda mamba 2>/dev/null
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 __conda_setup="$('/Users/yukinishio/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
@@ -216,3 +235,7 @@ else
 fi
 unset __mamba_setup
 # <<< mamba initialize <<<
+}
+
+conda() { _lazy_conda_init; conda "$@"; }
+mamba() { _lazy_conda_init; mamba "$@"; }
