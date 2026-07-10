@@ -32,39 +32,15 @@ export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
 
 ########################################
 # asdf（Homebrewインストール版：Go実装対応）
-. /opt/homebrew/opt/asdf/libexec/asdf.sh
-
-########################################
-# conda（Miniforge）
-__conda_setup="$('$HOME/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "$HOME/miniforge3/etc/profile.d/conda.sh" ]; then
-        . "$HOME/miniforge3/etc/profile.d/conda.sh"
-    else
-        export PATH="$HOME/miniforge3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-
-########################################
-# Google Cloud SDK
-if [ -f '$HOME/google-cloud-sdk/path.zsh.inc' ]; then . '$HOME/google-cloud-sdk/path.zsh.inc'; fi
-if [ -f '$HOME/google-cloud-sdk/completion.zsh.inc' ]; then . '$HOME/google-cloud-sdk/completion.zsh.inc'; fi
+# Go実装（v0.16以降）に asdf.sh は存在せず、shims を PATH に通すだけでよい
+export ASDF_DATA_DIR="${ASDF_DATA_DIR:-$HOME/.asdf}"
+export PATH="$ASDF_DATA_DIR/shims:$PATH"
 
 ########################################
 # 補完設定
-autoload -Uz compinit
-
-# Completion cache optimization
-if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
-  compinit
-else
-  compinit -C
-fi
 
 # Completion paths
+# compinit は実行時点の fpath だけを走査するため、必ず先に確定させる
 fpath=(~/.zfunc $fpath)
 if [[ $(uname -m) == "arm64" ]]; then
   fpath+=("/opt/homebrew/share/zsh/site-functions")
@@ -72,11 +48,33 @@ else
   fpath+=("/usr/local/share/zsh/site-functions")
 fi
 
+# 下の (#q...) を glob qualifier として解釈させるために必要
+setopt extended_glob
+
+autoload -Uz compinit
+
+# Completion cache optimization
+# glob qualifier は [[ ]] 内で展開されないので配列で受ける
+_zdump=(${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24))
+if (( $#_zdump )); then
+  compinit
+else
+  compinit -C
+fi
+unset _zdump
+
 # Completion styles
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 zstyle ':completion:*' ignore-parents parent pwd ..
 zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin /usr/X11R6/bin
 zstyle ':completion:*:processes' command 'ps x -o pid,s,args'
+
+########################################
+# Google Cloud SDK
+# completion.zsh.inc は compdef が未定義だと自前で compinit を走らせるため、
+# 必ず上の compinit より後に読み込む
+if [ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/google-cloud-sdk/path.zsh.inc"; fi
+if [ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/google-cloud-sdk/completion.zsh.inc"; fi
 
 ########################################
 # ヒストリ
@@ -98,7 +96,7 @@ setopt share_history
 setopt hist_ignore_all_dups
 setopt hist_ignore_space
 setopt hist_reduce_blanks
-setopt extended_glob
+# extended_glob は補完設定より前に有効化する必要があるため上部で setopt 済み
 
 ########################################
 # キーバインド
@@ -189,3 +187,32 @@ eval "$(gh completion -s zsh)"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/Users/yukinishio/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/Users/yukinishio/miniforge3/etc/profile.d/conda.sh" ]; then
+        . "/Users/yukinishio/miniforge3/etc/profile.d/conda.sh"
+    else
+        export PATH="/Users/yukinishio/miniforge3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
+
+# >>> mamba initialize >>>
+# !! Contents within this block are managed by 'mamba shell init' !!
+export MAMBA_EXE='/Users/yukinishio/miniforge3/bin/mamba';
+export MAMBA_ROOT_PREFIX='/Users/yukinishio/miniforge3';
+__mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__mamba_setup"
+else
+    alias mamba="$MAMBA_EXE"  # Fallback on help from mamba activate
+fi
+unset __mamba_setup
+# <<< mamba initialize <<<
