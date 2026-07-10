@@ -32,7 +32,9 @@ export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
 
 ########################################
 # asdf（Homebrewインストール版：Go実装対応）
-. /opt/homebrew/opt/asdf/libexec/asdf.sh
+# Go実装（v0.16以降）に asdf.sh は存在せず、shims を PATH に通すだけでよい
+export ASDF_DATA_DIR="${ASDF_DATA_DIR:-$HOME/.asdf}"
+export PATH="$ASDF_DATA_DIR/shims:$PATH"
 
 ########################################
 # conda（Miniforge）
